@@ -100,8 +100,6 @@ def update_index(dir_path, config, force=False, check_md5=False, remove=True, lo
             except (IOError, ValueError):
                 index = {}
 
-        subdir = None
-
         files = set(fn for fn in os.listdir(dir_path) if fn.endswith('.tar.bz2'))
         if could_be_mirror and any(fn.startswith('_license-') for fn in files):
             sys.exit("""\
@@ -123,9 +121,6 @@ def update_index(dir_path, config, force=False, check_md5=False, remove=True, lo
             d = read_index_tar(path, config, lock=lock)
             d.update(file_info(path))
             index[fn] = d
-            # there's only one subdir for a given folder, so only read these contents once
-            if not subdir:
-                subdir = d['subdir']
 
         for fn in files:
             index[fn]['sig'] = '.' if isfile(join(dir_path, fn + '.sig')) else None
@@ -156,8 +151,6 @@ def update_index(dir_path, config, force=False, check_md5=False, remove=True, lo
 
         repodata = {'packages': index, 'info': {}}
         write_repodata(repodata, dir_path, lock=lock, config=config)
-        # subdir_index = CURRENT_INDEX.get(subdir, {})
-        # subdir_index.update(index)
 
 
 def ensure_valid_channel(local_folder, subdir, config):
